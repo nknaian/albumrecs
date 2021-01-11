@@ -2,40 +2,45 @@
 
 {% block content %}
 <body>
-    <div style="padding: 15px; margin-top: 10px; margin-bottom: 10px;">
-        <div class="row">
-            <div class="col">
-                <h4> {{ round.music_type.name }}recs <i>{{round.status.name}}</i> phase</h1>
-            </div>
-            <div class="col">
-                <div class="text-right">
-                    {% block round_nav %} {% endblock %}
+    <div id="loading" style="display: none; cursor: wait;">
+        <div style="margin-left: 50%; margin-top: 20px; width: 35px; height: 35px; background: url(/static/loadingimage.gif) no-repeat;"></div>
+    </div>
+    <div id="content">
+        <div style="padding: 15px; margin-top: 10px; margin-bottom: 10px;">
+            <div class="row">
+                <div class="col">
+                    <h4> {{ round.music_type.name }}recs <i>{{round.status.name}}</i> phase</h1>
+                </div>
+                <div class="col">
+                    <div class="text-right">
+                        {% block round_nav %} {% endblock %}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="bg-light" style="padding: 15px; margin-top: 10px; margin-bottom: 10px;">
-        <h4>Round description:</h4>
-        <div class="text-center">
-            {% for line in round.description.split('\n') %}
-                {{ line }}<br>
-            {% endfor %}
-        </div>
-    </div>
-
-    {% if round.submissions %}
         <div class="bg-light" style="padding: 15px; margin-top: 10px; margin-bottom: 10px;">
-            <h4>The recommenders:</h4>
-                {% for submission in round.submissions %}
-                <div class="row bg-dark text-light" style="padding: 10px; margin-top: 10px; margin-bottom: 10px; margin-left: 10px; margin-right: 10px; display: inline-block;">
-                    {{ submission.user_name }}
-                </div>
+            <h4>Round description:</h4>
+            <div class="text-center">
+                {% for line in round.description.split('\n') %}
+                    {{ line }}<br>
                 {% endfor %}
+            </div>
         </div>
-    {% endif %}
 
-    <div class="text-left">
-        {% block round_content %} {% endblock %}
+        {% if round.submissions %}
+            <div class="bg-light" style="padding: 15px; margin-top: 10px; margin-bottom: 10px;">
+                <h4>The recommenders:</h4>
+                    {% for submission in round.submissions %}
+                    <div class="row bg-dark text-light" style="padding: 10px; margin-top: 10px; margin-bottom: 10px; margin-left: 10px; margin-right: 10px; display: inline-block;">
+                        {{ submission.user_name }}
+                    </div>
+                    {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="text-left">
+            {% block round_content %} {% endblock %}
+        </div>
     </div>
 </body>
 {% endblock %}
