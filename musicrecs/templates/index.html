@@ -38,4 +38,12 @@
             No, although it definitely enhances the experience to have an account. Spotify allows people without accounts to search and share music, which is all that is necessary to participate.
         </p>
     </div>
+
+    <div>
+        <form
+            method="get"
+            action="{{ url_for('sp')}}">
+            <input class="btn btn-primary" style="white-space: normal;" type="submit" name="sp_user_page" value="Spotify User">
+        </form>
+    </div>
 {% endblock %}

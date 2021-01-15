@@ -1,8 +1,11 @@
+import os
 import random
 import secrets
 from copy import deepcopy
+import uuid
+import spotipy
 
-from flask import render_template, redirect, url_for, flash
+from flask import render_template, redirect, url_for, flash, session
 from flask.globals import request
 from spotipy.exceptions import SpotifyException
 
@@ -11,10 +14,16 @@ import musicrecs.random_words.random_words as random_words
 from musicrecs import app
 from musicrecs import db
 from musicrecs import spotify_iface
+from musicrecs import caches_folder
 from musicrecs.sql_models import Submission, Round
 from musicrecs.forms import NewRoundForm, TrackrecForm, AlbumrecForm
 from musicrecs.enums import RoundStatus, MusicType
 from musicrecs.exceptions import UserError, InternalError
+from musicrecs.spotify.user_spotify import UserSpotify
+
+
+def session_cache_path():
+    return caches_folder + session.get('uuid')
 
 
 '''ROUTES'''
@@ -177,6 +186,62 @@ def round_submit_rec(long_id):
                            rec_form=rec_form,
                            round=round)
 
+
+@app.route('/sp')
+def sp():
+    # If Visitor is unknown, give random ID
+    if not session.get('uuid'):
+        print("visitor is unknown")
+        session['uuid'] = str(uuid.uuid4())
+
+    auth_manager = spotipy.oauth2.SpotifyOAuth(scope='user-read-currently-playing playlist-modify-private',
+                                                cache_path=session_cache_path(), 
+                                                show_dialog=True)
+
+    if auth_manager.get_cached_token():
+        print("authed yo")
+        auth_url = None
+        user_spotify = UserSpotify(auth_manager)
+    else:
+        print("not authed ugh")
+        auth_url = auth_manager.get_authorize_url()
+        user_spotify = None
+
+    return render_template('sp/sp.html', user_spotify=user_spotify, auth_url=auth_url)
+
+@app.route('/sp_login_success')
+def sp_login_success():
+    auth_manager = spotipy.oauth2.SpotifyOAuth(scope='user-read-currently-playing playlist-modify-private',
+                                                cache_path=session_cache_path(), 
+                                                show_dialog=True)
+    auth_manager.get_access_token(request.args.get("code"))
+    return redirect(url_for('sp'))
+
+
+@app.route('/sp/get_latest_album', methods=['POST'])
+def get_latest_album():
+    auth_manager = spotipy.oauth2.SpotifyOAuth(cache_path=session_cache_path())
+
+    if not auth_manager.get_cached_token():
+        return redirect(url_for('sp'))
+
+    # user_spotify = UserSpotify(auth_manager)
+
+    # print(user_spotify.get_latest_album().format("text"))
+
+    spotify = spotipy.Spotify(auth_manager=auth_manager)
+    track = spotify.current_user_playing_track()
+    if not track is None:
+        return track
+    return "No track currently playing."
+
+    #return redirect(url_for('sp'))
+
+@app.route('/sp/logout', methods=['POST'])
+def sp_logout():
+    os.remove(session_cache_path())
+    session.clear()
+    return redirect(url_for('sp'))
 
 '''PRIVATE FUNCTIONS'''
 
