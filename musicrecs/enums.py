@@ -28,3 +28,8 @@ class RoundStatus(MusicRecsEnum):
 class SnoozinRecType(MusicRecsEnum):
     random = 0
     similar = 1
+
+
+class NewType(MusicRecsEnum):
+    random = 0
+    similar = 1
