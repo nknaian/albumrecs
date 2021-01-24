@@ -1,97 +1,63 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<body>
-    <div id="loading" style="display: none; cursor: wait;">
-        <div style="margin-left: 50%; margin-top: 20px; width: 35px; height: 35px; background: url(/static/loadingimage.gif) no-repeat;"></div>
-    </div>
-    <div id="content">
-        <div style="padding: 15px; margin-top: 10px; margin-bottom: 10px;">
-            <div class="row">
-                <div class="col">
-                    <h4> {{ round.music_type.name }}recs <i>{{round.status.name}}</i> phase</h1>
-                </div>
-                <div class="col text-right">
-                    <button type="button" class="btn btn-secondary" style="white-space: normal;" data-toggle="modal" data-target="#shareRoundLinkModal" onclick="fillRoundLinkTextbox();">
-                        Share the Round Link
-                    </button>
-                </div>
+    <div style="padding: 15px; margin-top: 10px; margin-bottom: 10px;">
+        <div class="row">
+            <div class="col">
+                <h4> {{ round.music_type.name }}recs <i>{{round.status.name}}</i> phase</h1>
+            </div>
+            <div class="col text-right">
+                <button type="button" class="btn btn-secondary" style="white-space: normal;" data-toggle="modal" data-target="#shareRoundLinkModal" onclick="fillRoundLinkTextbox();">
+                    Share the Round Link
+                </button>
             </div>
         </div>
+    </div>
+    <div class="bg-light" style="padding: 15px; margin-top: 10px; margin-bottom: 10px;">
+        <h4>Round description</h4>
+        <div class="text-center">
+            {% for line in round.description.split('\n') %}
+                {{ line }}<br>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if round.submissions %}
         <div class="bg-light" style="padding: 15px; margin-top: 10px; margin-bottom: 10px;">
-            <h4>Round description</h4>
-            <div class="text-center">
-                {% for line in round.description.split('\n') %}
-                    {{ line }}<br>
+            <h4>The recommenders</h4>
+                {% for submission in round.submissions %}
+                <div class="row bg-dark text-light" style="padding: 10px; margin-top: 10px; margin-bottom: 10px; margin-left: 10px; margin-right: 10px; display: inline-block;">
+                    {{ submission.user_name }}
+                </div>
                 {% endfor %}
-            </div>
         </div>
+    {% endif %}
 
-        {% if round.submissions %}
-            <div class="bg-light" style="padding: 15px; margin-top: 10px; margin-bottom: 10px;">
-                <h4>The recommenders</h4>
-                    {% for submission in round.submissions %}
-                    <div class="row bg-dark text-light" style="padding: 10px; margin-top: 10px; margin-bottom: 10px; margin-left: 10px; margin-right: 10px; display: inline-block;">
-                        {{ submission.user_name }}
-                    </div>
-                    {% endfor %}
-            </div>
-        {% endif %}
-
-        <div class="text-left">
-            {% block round_content %} {% endblock %}
-        </div>
-        <div class="text-center" style="padding: 15px; margin-top: 10px; margin-bottom: 20px;">
-            {% block round_nav %} {% endblock %}
-        </div>
+    <div class="text-left">
+        {% block round_content %} {% endblock %}
     </div>
-</body>
+    <div class="text-center" style="padding: 15px; margin-top: 10px; margin-bottom: 20px;">
+        {% block round_nav %} {% endblock %}
+    </div>
 
-<!-- 'Share Round Link' popup window-->
-<div id="shareRoundLinkModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Share the Round Link</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <input type="text" style="width: 100%;" value="" id="roundLinkTextbox">
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" style="white-space: normal;" onclick="copyRoundLink()">Copy link to clipboard</button>
+    <!-- 'Share Round Link' popup window-->
+    <div id="shareRoundLinkModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Share the Round Link</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" style="width: 100%;" value="" id="roundLinkTextbox">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" style="white-space: normal;" onclick="copyRoundLink()">Copy link to clipboard</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script type="text/javascript">
-    function fillRoundLinkTextbox() {
-        var textbox = document.getElementById("roundLinkTextbox")
-        textbox.value = window.location.href
-    }
-
-    function copyRoundLink() {
-        /* Get the text field */
-        var copyText = document.getElementById("roundLinkTextbox");
-    
-        /* Select the text field */
-        copyText.select();
-        copyText.setSelectionRange(0, 99999); /* For mobile devices */
-    
-        /* Copy the text inside the text field */
-        document.execCommand("copy");
-    }
-
-    function confirmAndAdvance(confirm_msg) {
-        if (confirm(confirm_msg)) {
-            $("#loading").show()
-            $("#content").hide()
-            return true
-        }
-        else {
-            return false
-        }
-    }
-</script>
+    <!-- Javascript used in the round pages-->
+    <script type="text/javascript" src="{{url_for('static', filename='js/round.js')}}"></script>
 {% endblock %}
