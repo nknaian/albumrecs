@@ -5,7 +5,7 @@
     <form
         method="post"
         action="{{ url_for('round_advance', long_id=round.long_id)}}"
-        onsubmit="return confirm_and_advance('Are you sure you want to end the submission phase for all participants?')">
+        onsubmit="return confirmAndAdvance('Are you sure you want to end the submission phase for all participants?')">
         <input
             class="btn btn-danger"
             style="white-space: normal;"
@@ -14,19 +14,6 @@
             value="Advance to the listen phase"
         >
     </form>
-
-    <script type="text/javascript">
-        function confirm_and_advance(confirm_msg) {
-            if (confirm(confirm_msg)) {
-                $("#loading").show()
-                $("#content").hide()
-                return true
-            }
-            else {
-                return false
-            }
-        }
-    </script>
 {% endblock %}
 
 {% block round_content %}

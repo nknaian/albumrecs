@@ -6,7 +6,7 @@
         <form
             method="post"
             action="{{ url_for('round_advance', long_id=round.long_id)}}"
-            onsubmit="return confirm('Are you sure you want to reveal to all participants who recommended what?')";>
+            onsubmit="return confirmAndAdvance('Are you sure you want to reveal to all participants who recommended what?')";>
             <input class="btn btn-danger" style="white-space: normal;" type="submit" name="advance_to_revealed" value="Advance to the revealed phase">
         </form>
     {% endif %}

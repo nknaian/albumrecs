@@ -12,7 +12,7 @@
                     <h4> {{ round.music_type.name }}recs <i>{{round.status.name}}</i> phase</h1>
                 </div>
                 <div class="col text-right">
-                    <button type="button" class="btn btn-secondary" style="white-space: normal;" data-toggle="modal" data-target="#shareRoundLinkModal" onclick="fill_round_link_textbox();">
+                    <button type="button" class="btn btn-secondary" style="white-space: normal;" data-toggle="modal" data-target="#shareRoundLinkModal" onclick="fillRoundLinkTextbox();">
                         Share the Round Link
                     </button>
                 </div>
@@ -66,8 +66,7 @@
 </div>
 
 <script type="text/javascript">
-    function fill_round_link_textbox() {
-        $('#round_link_copy_button').tooltip('hide')
+    function fillRoundLinkTextbox() {
         var textbox = document.getElementById("roundLinkTextbox")
         textbox.value = window.location.href
     }
@@ -82,6 +81,17 @@
     
         /* Copy the text inside the text field */
         document.execCommand("copy");
+    }
+
+    function confirmAndAdvance(confirm_msg) {
+        if (confirm(confirm_msg)) {
+            $("#loading").show()
+            $("#content").hide()
+            return true
+        }
+        else {
+            return false
+        }
     }
 </script>
 {% endblock %}
