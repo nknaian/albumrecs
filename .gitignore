@@ -136,3 +136,5 @@ gmail_creds.json
 localtools/
 test.py
 *.vscode
+setup.sh
+musicrecs.db
