@@ -14,16 +14,13 @@ import musicrecs.random_words.random_words as random_words
 from musicrecs import app
 from musicrecs import db
 from musicrecs import spotify_iface
-from musicrecs import caches_folder
+from musicrecs import spotify_user
 from musicrecs.sql_models import Submission, Round
 from musicrecs.forms import NewRoundForm, TrackrecForm, AlbumrecForm
 from musicrecs.enums import RoundStatus, MusicType
 from musicrecs.exceptions import UserError, InternalError
-from musicrecs.spotify.user_spotify import UserSpotify
+from musicrecs.spotify.user_spotify import SpotifyUser
 
-
-def session_cache_path():
-    return caches_folder + session.get('uuid')
 
 
 '''ROUTES'''
@@ -62,7 +59,7 @@ def index():
     except InternalError as e:
         flash(e, "danger")
 
-    return render_template('index.html', new_round_form=new_round_form)
+    return render_template('index.html', new_round_form=new_round_form, target_view='sp')
 
 
 @app.route('/round/<string:long_id>', methods=["GET", "POST"])
@@ -187,61 +184,35 @@ def round_submit_rec(long_id):
                            round=round)
 
 
-@app.route('/sp')
-def sp():
-    # If Visitor is unknown, give random ID
+@app.route('/sp_login', methods=['POST'])
+def sp_login():
+    target_view = 'sp'
+    # Create session id for new users
     if not session.get('uuid'):
         print("visitor is unknown")
         session['uuid'] = str(uuid.uuid4())
 
-    auth_manager = spotipy.oauth2.SpotifyOAuth(scope='user-read-currently-playing playlist-modify-private',
-                                                cache_path=session_cache_path(), 
-                                                show_dialog=True)
+    auth_result, auth_manager = spotify_user.check_user_auth()
 
-    if auth_manager.get_cached_token():
-        print("authed yo")
-        auth_url = None
-        user_spotify = UserSpotify(auth_manager)
+    if auth_result:
+        return redirect(url_for(target_view))
     else:
-        print("not authed ugh")
-        auth_url = auth_manager.get_authorize_url()
-        user_spotify = None
+        spotify_user.save_target_view(target_view)
+        return redirect(auth_manager.get_authorize_url())
 
-    return render_template('sp/sp.html', user_spotify=user_spotify, auth_url=auth_url)
 
 @app.route('/sp_login_success')
 def sp_login_success():
-    auth_manager = spotipy.oauth2.SpotifyOAuth(scope='user-read-currently-playing playlist-modify-private',
-                                                cache_path=session_cache_path(), 
-                                                show_dialog=True)
-    auth_manager.get_access_token(request.args.get("code"))
-    return redirect(url_for('sp'))
+    spotify_user.auth_new_user(request.args.get("code"))
+    return redirect(url_for(spotify_user.get_target_view()))
 
+@app.route('/sp')
+def sp():
+    if 'get_current_track' in request.form:
+        print(spotify_user.get_current_track())
 
-@app.route('/sp/get_latest_album', methods=['POST'])
-def get_latest_album():
-    auth_manager = spotipy.oauth2.SpotifyOAuth(cache_path=session_cache_path())
+    return render_template('sp/sp.html')
 
-    if not auth_manager.get_cached_token():
-        return redirect(url_for('sp'))
-
-    # user_spotify = UserSpotify(auth_manager)
-
-    # print(user_spotify.get_latest_album().format("text"))
-
-    spotify = spotipy.Spotify(auth_manager=auth_manager)
-    track = spotify.current_user_playing_track()
-    if not track is None:
-        return track
-    return "No track currently playing."
-
-    #return redirect(url_for('sp'))
-
-@app.route('/sp/logout', methods=['POST'])
-def sp_logout():
-    os.remove(session_cache_path())
-    session.clear()
-    return redirect(url_for('sp'))
 
 '''PRIVATE FUNCTIONS'''
 

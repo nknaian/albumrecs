@@ -1,13 +1,15 @@
 import os
 import random
 import time
+import uuid
 
-from flask import Flask
+from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_session import Session
 
 from musicrecs.spotify.spotify import Spotify
+from musicrecs.spotify.user_spotify import SpotifyUser
 
 # Create flask application and database
 app = Flask(__name__)
@@ -33,9 +35,7 @@ random.seed(time.time())
 # Create 'client credentials' spotify interface
 spotify_iface = Spotify()
 
-# Folder to store spotify caches in
-caches_folder = './.spotify_caches/'
-if not os.path.exists(caches_folder):
-    os.makedirs(caches_folder)
+# Create user spotify interface
+spotify_user = SpotifyUser()
 
 from musicrecs import views

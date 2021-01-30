@@ -2,27 +2,13 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block content %}
-{% if auth_url %}
-    <a href="{{auth_url}}">authorize</a>
-{% endif %}
 
-{% if user_spotify %}
-    <div>
-        <form
-            method="post"
-            action="{{ url_for('get_latest_album')}}">
-            <input class="btn btn-primary" style="white-space: normal;" type="submit" name="sp_latest_album" value="Get latest album">
-        </form>
-    </div>
-
-    <div>
-        <form
-            method="post"
-            action="{{ url_for('sp_logout')}}">
-            <input class="btn btn-danger" style="white-space: normal;" type="submit" name="sp_logout" value="Logout">
-        </form>
-    </div>
-    
-{% endif %}
+<div>
+    <form
+        method="get"
+        action="{{ url_for('sp')}}">
+        <input class="btn btn-primary" style="white-space: normal;" type="submit" name="sp_current_track" value="Get current track">
+    </form>
+</div>
 
 {% endblock %}
